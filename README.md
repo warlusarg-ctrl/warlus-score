@@ -1,3 +1,6 @@
+
+  [athlete-score (2).html](https://github.com/user-attachments/files/29068894/athlete-score.2.html)
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -795,7 +798,7 @@ function showScreen(id) {
 // ═══════════════════════════════════════
 //  SUBMIT EMAIL → Google Sheets
 // ═══════════════════════════════════════
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxmUzo3yQ3dKhUWMHcuWBN8roIcF1FT0QkEX0Pgsj0yfMgTXDYlrZ5qfk8EJYHDj_X6/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx9lX-I3v523cr3aiKH4bJvnHMVzWQFwdNzDBfqsGxy8JYL4w9JbBQb6_jGL8nMdigA/exec';
 
 function submitAndShow() {
   const nombre = document.getElementById('input-name').value.trim();
