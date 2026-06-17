@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WARLUS — Hydration Score</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:        #0F1B3C;
+    --navy-mid:    #1A2B52;
+    --navy-deep:   #0A1228;
+    --cyan:        #00C2FF;
+    --cyan-dark:   #0099CC;
+    --cyan-glow:   rgba(0,194,255,0.15);
+    --white:       #FFFFFF;
+    --gray:        #8A94A6;
+    --danger:      #FF3B30;
+    --warning:     #FF9500;
+    --ok:          #34C759;
+  }
+
+  html, body {
+    min-height: 100%;
+    background: var(--navy-deep);
+    font-family: 'Barlow', sans-serif;
+    color: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    animation: fadeIn 0.4s ease;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── LOGO ── */
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 4px;
+    color: var(--white);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .logo-mark {
+    width: 28px; height: 36px;
+    margin: 0 auto 6px;
+    display: block;
+  }
+  .tagline {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  /* ── INTRO ── */
+  .badge {
+    display: inline-block;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+  }
+  .intro-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(36px, 9vw, 58px);
+    line-height: 0.95;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    max-width: 420px;
+  }
+  .intro-headline em { color: var(--cyan); font-style: normal; }
+  .intro-sub {
+    font-size: 14px;
+    color: var(--gray);
+    text-align: center;
+    margin-bottom: 36px;
+    max-width: 300px;
+    line-height: 1.6;
+  }
+
+  /* fact box */
+  .fact-box {
+    background: var(--cyan-glow);
+    border: 1px solid rgba(0,194,255,0.25);
+    border-radius: 6px;
+    padding: 14px 18px;
+    max-width: 360px;
+    width: 100%;
+    margin-bottom: 36px;
+    text-align: center;
+  }
+  .fact-box p {
+    font-size: 13px;
+    color: var(--cyan);
+    line-height: 1.6;
+  }
+  .fact-box strong { color: var(--white); }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--navy-deep);
+    border: none;
+    border-radius: 4px;
+    padding: 18px 48px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 17px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    max-width: 340px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover  { background: #33CFFF; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--gray);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    padding: 14px 48px;
+    font-family: 'Barlow', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 340px;
+    margin-top: 12px;
+    transition: border-color 0.2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ── QUESTION ── */
+  .progress-bar-wrap {
+    width: 100%; max-width: 440px;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    margin-bottom: 36px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--cyan);
+    transition: width 0.5s ease;
+  }
+  .q-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%; max-width: 440px;
+    margin-bottom: 8px;
+  }
+  .q-counter   { font-size: 10px; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; }
+  .q-dimension { font-size: 10px; color: var(--cyan);  letter-spacing: 2px; text-transform: uppercase; }
+
+  .q-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(24px, 6vw, 34px);
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    max-width: 400px;
+    text-transform: uppercase;
+  }
+  .q-hint {
+    font-size: 12px;
+    color: var(--cyan);
+    text-align: center;
+    margin-bottom: 28px;
+    max-width: 360px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .options {
+    display: flex; flex-direction: column;
+    gap: 10px; width: 100%; max-width: 440px;
+  }
+  .option-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 15px 18px;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .option-btn:hover   { border-color: var(--cyan); background: var(--cyan-glow); }
+  .option-btn.selected { border-color: var(--cyan); background: rgba(0,194,255,0.18); }
+  .option-letter {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .option-btn.selected .option-letter {
+    background: var(--cyan); border-color: var(--cyan); color: var(--navy-deep);
+  }
+
+  /* ── EMAIL ── */
+  .email-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(30px, 7vw, 44px);
+    text-align: center; text-transform: uppercase;
+    line-height: 1.05; margin-bottom: 12px;
+  }
+  .email-headline em { color: var(--cyan); font-style: normal; }
+  .email-sub {
+    color: var(--gray); font-size: 14px;
+    text-align: center; margin-bottom: 32px;
+    max-width: 300px; line-height: 1.6;
+  }
+  .input-wrap { width: 100%; max-width: 420px; margin-bottom: 12px; }
+  .input-wrap input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px; padding: 16px 18px;
+    color: var(--white); font-family: 'Barlow', sans-serif;
+    font-size: 15px; outline: none; transition: border-color 0.2s;
+  }
+  .input-wrap input::placeholder { color: var(--gray); }
+  .input-wrap input:focus { border-color: var(--cyan); }
+  .privacy-note { font-size: 11px; color: var(--gray); text-align: center; margin-bottom: 28px; opacity: 0.7; }
+
+  /* ── RESULT ── */
+  .score-ring-wrap {
+    position: relative; width: 170px; height: 170px; margin: 0 auto 20px;
+  }
+  .score-ring-svg { width: 170px; height: 170px; transform: rotate(-90deg); }
+  .score-ring-bg   { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 7; }
+  .score-ring-fill {
+    fill: none; stroke-width: 7; stroke-linecap: round;
+    transition: stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1), stroke 0.5s;
+  }
+  .score-number {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .score-digit {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 54px; line-height: 1;
+  }
+  .score-max { font-size: 12px; color: var(--gray); letter-spacing: 1px; }
+
+  .score-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 20px;
+    letter-spacing: 4px; text-transform: uppercase;
+    text-align: center; margin-bottom: 8px;
+  }
+  .score-desc {
+    font-size: 14px; color: var(--gray);
+    text-align: center; max-width: 320px;
+    line-height: 1.65; margin-bottom: 24px;
+  }
+
+  /* reveal fact */
+  .reveal-card {
+    background: var(--cyan-glow);
+    border: 1px solid rgba(0,194,255,0.2);
+    border-radius: 8px;
+    padding: 16px 18px;
+    width: 100%; max-width: 440px;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+  .reveal-card .reveal-icon { font-size: 24px; margin-bottom: 8px; }
+  .reveal-card p { font-size: 13px; color: var(--gray); line-height: 1.6; }
+  .reveal-card strong { color: var(--cyan); }
+
+  /* insight cards */
+  .insight-cards {
+    width: 100%; max-width: 440px;
+    display: flex; flex-direction: column;
+    gap: 10px; margin-bottom: 28px;
+  }
+  .insight-card {
+    background: var(--navy-mid);
+    border-radius: 8px; padding: 14px 16px;
+    display: flex; align-items: flex-start;
+    gap: 12px; border-left: 3px solid transparent;
+  }
+  .insight-card.good { border-left-color: var(--ok); }
+  .insight-card.warn { border-left-color: var(--warning); }
+  .insight-card.bad  { border-left-color: var(--danger); }
+  .insight-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .insight-text { font-size: 13px; color: var(--gray); line-height: 1.5; }
+  .insight-text strong { color: var(--white); display: block; font-size: 14px; margin-bottom: 2px; }
+
+  .divider {
+    width: 100%; max-width: 440px;
+    height: 1px; background: rgba(255,255,255,0.07);
+    margin: 4px 0 24px;
+  }
+  .share-note { font-size: 11px; color: var(--gray); text-align: center; margin-top: 14px; opacity: 0.7; }
+
+  .brand-footer { margin-top: 40px; text-align: center; }
+  .brand-footer .logo { font-size: 18px; margin-bottom: 6px; }
+  .brand-footer p { font-size: 11px; color: var(--gray); letter-spacing: 1px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1 — INTRO
+══════════════════════════════════════ -->
+<div class="screen active" id="screen-intro">
+  <img class="logo-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAuoAAAQACAYAAAC3aHx4AAABWGlDQ1BJQ0MgUHJvZmlsZQAAeJx9kLFLw1AQxr9WpaB1EB0cHDKJQ5SSCro4tBVEcQhVweqUvqapkMZHkiIFN/+Bgv+BCs5uFoc6OjgIopPo5uSk4KLleS+JpCJ6j+N+fO+74zggOW5wbvcDqDu+W1zKK5ulLSX1jAS9IAzm8Zyur0r+rj/j/T703k7LWb///43Biukxqp+UGcZdH0ioxPqezyXvE4+5tBRxS7IV8onkcsjngWe9WCC+JlZYzagQvxCr5R7d6uG63WDRDnL7tOlsrMk5lBNYxA48cNgw0IQCHdk//LOBv4BdcjfhUp+FGnzqyZEiJ5jEy3DAMAOVWEOGUpN3ju53F91PjbWDJ2ChI4S4iLWVDnA2Rydrx9rUPDAyBFy1ueEagdRHmaxWgddTYLgEjN5Qz7ZXzWrh9uk8MPAoxNskkDoEui0hPo6E6B5T8wNw6XwBA6diE8HYWhMAABtfSURBVHic7d1blhPHFkVR+Q7632XfD7swUK9MKR8rIuZsQYHiY7HHUfHX33///QAAAFr+d/cPAAAAvCfUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQqwuFXZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HAAAAASUVORK5CYII=" alt="WARLUS"/>
+  <div class="logo">WARLUS</div>
+  <div class="tagline">Hidratación · Rendimiento</div>
+
+  <div class="badge">Hydration Score</div>
+
+  <h1 class="intro-headline">¿Estás<br>hidratado o<br><em>solo creés</em><br>que lo estás?</h1>
+  <p class="intro-sub">5 preguntas. 30 segundos. La mayoría de los atletas falla esto sin saberlo.</p>
+
+  <div class="fact-box">
+    <p>Una deshidratación del <strong>2%</strong> reduce el rendimiento físico hasta un <strong>20%</strong>.<br>Y la mayoría no lo siente hasta que ya es tarde.</p>
+  </div>
+
+  <button class="btn-primary" onclick="startQuiz()">DESCUBRIR MI HYDRATION SCORE</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2 — PREGUNTAS
+══════════════════════════════════════ -->
+<div class="screen" id="screen-quiz">
+  <div style="width:100%;max-width:440px">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="q-meta">
+    <span class="q-counter"   id="q-counter">PREGUNTA 1 DE 5</span>
+    <span class="q-dimension" id="q-dimension">CANTIDAD</span>
+  </div>
+  <div class="q-text" id="q-text"></div>
+  <div class="q-hint" id="q-hint"></div>
+  <div class="options" id="options-wrap"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3 — EMAIL
+══════════════════════════════════════ -->
+<div class="screen" id="screen-email">
+  <img class="logo-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAuoAAAQACAYAAAC3aHx4AAABWGlDQ1BJQ0MgUHJvZmlsZQAAeJx9kLFLw1AQxr9WpaB1EB0cHDKJQ5SSCro4tBVEcQhVweqUvqapkMZHkiIFN/+Bgv+BCs5uFoc6OjgIopPo5uSk4KLleS+JpCJ6j+N+fO+74zggOW5wbvcDqDu+W1zKK5ulLSX1jAS9IAzm8Zyur0r+rj/j/T703k7LWb///43Biukxqp+UGcZdH0ioxPqezyXvE4+5tBRxS7IV8onkcsjngWe9WCC+JlZYzagQvxCr5R7d6uG63WDRDnL7tOlsrMk5lBNYxA48cNgw0IQCHdk//LOBv4BdcjfhUp+FGnzqyZEiJ5jEy3DAMAOVWEOGUpN3ju53F91PjbWDJ2ChI4S4iLWVDnA2Rydrx9rUPDAyBFy1ueEagdRHmaxWgddTYLgEjN5Qz7ZXzWrh9uk8MPAoxNskkDoEui0hPo6E6B5T8wNw6XwBA6diE8HYWhMAABtfSURBVHic7d1blhPHFkVR+Q7632XfD7swUK9MKR8rIuZsQYHiY7HHUfHX33///QAAAFr+d/cPAAAAvCfUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQqwuFXZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HZiC1HAAAAASUVORK5CYII=" alt="WARLUS"/>
+  <div class="logo">WARLUS</div>
+
+  <h2 class="email-headline">Tu <em>Hydration<br>Score</em> está listo.</h2>
+  <p class="email-sub">Dejá tu mail y te enviamos tu diagnóstico completo con tu plan de hidratación personalizado.</p>
+
+  <div class="input-wrap">
+    <input type="text"  id="input-name"  placeholder="Tu nombre"  autocomplete="given-name"/>
+  </div>
+  <div class="input-wrap">
+    <input type="email" id="input-email" placeholder="Tu email"   autocomplete="email"/>
+  </div>
+  <p class="privacy-note">Sin spam. Solo contenido de rendimiento.</p>
+
+  <button class="btn-primary"   onclick="submitAndShow()">VER MI HYDRATION SCORE</button>
+  <button class="btn-secondary" onclick="showResult()">Ver sin guardar</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 4 — RESULTADO
+══════════════════════════════════════ -->
+<div class="screen" id="screen-result">
+  <div class="logo">WARLUS</div>
+  <div class="tagline" style="margin-bottom:24px">Hydration Score</div>
+
+  <div class="score-ring-wrap">
+    <svg class="score-ring-svg" viewBox="0 0 170 170">
+      <circle class="score-ring-bg"   cx="85" cy="85" r="73"/>
+      <circle class="score-ring-fill" id="ring-fill" cx="85" cy="85" r="73"
+        stroke-dasharray="459" stroke-dashoffset="459"/>
+    </svg>
+    <div class="score-number">
+      <span class="score-digit" id="score-digit">0</span>
+      <span class="score-max">/ 100</span>
+    </div>
+  </div>
+
+  <div class="score-label" id="score-label">—</div>
+  <p class="score-desc"  id="score-desc"></p>
+
+  <div class="reveal-card" id="reveal-card">
+    <div class="reveal-icon">💧</div>
+    <p id="reveal-text"></p>
+  </div>
+
+  <div class="insight-cards" id="insight-cards"></div>
+
+  <div class="divider"></div>
+
+  <button class="btn-primary"   onclick="shareScore()">COMPARTIR MI HYDRATION SCORE</button>
+  <button class="btn-secondary" onclick="restartQuiz()">Repetir el test</button>
+  <p class="share-note">¿Tu equipo sabe cuánto le cuesta estar deshidratado?</p>
+
+  <div class="brand-footer">
+    <div class="logo" style="margin-top:36px">WARLUS</div>
+    <p>No gana el que más entrena.<br>Gana el que mejor se recupera.</p>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    dimension: 'CANTIDAD',
+    text: '¿CUÁNTOS LITROS DE AGUA\nTOMÁS POR DÍA?',
+    hint: 'Contá solo agua — no café, no mate, no jugos.',
+    weight: 0.25,
+    options: [
+      { label: 'Menos de 1 litro',        score: 0.0 },
+      { label: 'Entre 1 y 1.5 litros',    score: 0.4 },
+      { label: 'Entre 1.5 y 2.5 litros',  score: 0.8 },
+      { label: 'Más de 2.5 litros',       score: 1.0 },
+    ]
+  },
+  {
+    dimension: 'TIMING',
+    text: '¿CUÁNDO TOMÁS AGUA\nEN RELACIÓN AL ENTRENAMIENTO?',
+    hint: 'Sé honesto — lo que hacés realmente, no lo ideal.',
+    weight: 0.20,
+    options: [
+      { label: 'Solo cuando tengo sed durante el entreno',              score: 0.1 },
+      { label: 'Antes y durante, pero me olvido después',              score: 0.5 },
+      { label: 'Antes, durante y después de forma consciente',         score: 0.85 },
+      { label: 'Tengo un protocolo: horarios y cantidades definidas',  score: 1.0 },
+    ]
+  },
+  {
+    dimension: 'SEÑALES',
+    text: '¿CÓMO SABÉS QUE\nESTÁS DESHIDRATADO?',
+    hint: 'La sed es la última señal — cuando la sentís, ya perdiste rendimiento.',
+    weight: 0.20,
+    options: [
+      { label: 'Cuando tengo sed',                                      score: 0.0 },
+      { label: 'Cuando me duele la cabeza o me mareo',                 score: 0.2 },
+      { label: 'Controlo el color de la orina',                        score: 0.85 },
+      { label: 'Peso antes y después del entreno para calcular pérdida', score: 1.0 },
+    ]
+  },
+  {
+    dimension: 'INTERFERENCIAS',
+    text: '¿CUÁNTOS MATES O CAFÉS\nTOMÁS POR DÍA?',
+    hint: 'Cada mate o café requiere compensar con agua extra.',
+    weight: 0.20,
+    options: [
+      { label: 'Más de 6',          score: 0.0 },
+      { label: 'Entre 4 y 6',       score: 0.35 },
+      { label: 'Entre 2 y 3',       score: 0.7 },
+      { label: '1 o ninguno',       score: 1.0 },
+    ]
+  },
+  {
+    dimension: 'ACTIVIDAD',
+    text: '¿AJUSTÁS TU HIDRATACIÓN\nCUANDO HACE CALOR O\nENTRENÁS MÁS DURO?',
+    hint: 'En días de calor o alta intensidad la pérdida de líquido se duplica.',
+    weight: 0.15,
+    options: [
+      { label: 'No, tomo lo mismo siempre',                             score: 0.0 },
+      { label: 'Tomo un poco más pero sin criterio',                   score: 0.4 },
+      { label: 'Sí, aumento el agua en esos días',                     score: 0.8 },
+      { label: 'Calculo en base a sudoración y temperatura',           score: 1.0 },
+    ]
+  },
+];
+
+const SCORE_TIERS = [
+  { min: 85, label: 'HIDRATACIÓN ÓPTIMA',   color: '#00C2FF',
+    desc: 'Tu protocolo de hidratación está al nivel de un atleta profesional. Sos parte del 10% que realmente lo hace bien.',
+    reveal: 'Con este nivel de hidratación, tu rendimiento cognitivo y físico está operando al máximo. Seguí así.' },
+  { min: 65, label: 'BIEN HIDRATADO',        color: '#34C759',
+    desc: 'Tenés buenos hábitos pero hay margen para optimizar. Un ajuste en timing o en compensar el mate puede darte un 10% más de rendimiento.',
+    reveal: 'Estás en el top 30%. Con pequeños ajustes en timing y en compensar el café/mate podés llegar a óptimo.' },
+  { min: 45, label: 'HIDRATACIÓN PARCIAL',   color: '#FF9500',
+    desc: 'Te hidratás, pero de forma inconsistente. Probablemente entrenás en un estado de deshidratación leve sin saberlo.',
+    reveal: 'A este nivel, tu rendimiento puede estar hasta un 10% por debajo de tu potencial real — sin que lo notes.' },
+  { min: 25, label: 'EN DEUDA HÍDRICA',      color: '#FF6B00',
+    desc: 'Tu cuerpo está operando con déficit de agua de forma crónica. Eso impacta directo en fuerza, resistencia y recuperación.',
+    reveal: 'Una deshidratación del 2% reduce tu rendimiento físico hasta un 20%. Probablemente estés ahí ahora mismo.' },
+  { min:  0, label: 'DESHIDRATADO',          color: '#FF3B30',
+    desc: 'Tu rendimiento está siendo limitado seriamente por la falta de agua. Este es el cambio de hábito con mayor impacto inmediato que podés hacer.',
+    reveal: 'El 75% del cerebro es agua. Con este nivel de hidratación, tu toma de decisiones, fuerza y resistencia están comprometidas.' },
+];
+
+let currentQ = 0;
+let answers  = [];
+
+function startQuiz() {
+  currentQ = 0; answers = [];
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q   = QUESTIONS[currentQ];
+  const pct = (currentQ / QUESTIONS.length) * 100;
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent     = `PREGUNTA ${currentQ + 1} DE ${QUESTIONS.length}`;
+  document.getElementById('q-dimension').textContent   = q.dimension;
+  document.getElementById('q-text').textContent        = q.text;
+  document.getElementById('q-hint').textContent        = q.hint;
+
+  const wrap = document.getElementById('options-wrap');
+  wrap.innerHTML = '';
+  ['A','B','C','D'].forEach((letter, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letter}</span>${q.options[i].label}`;
+    btn.onclick = () => selectOption(i, btn);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectOption(index, btn) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  setTimeout(() => {
+    answers.push({ score: QUESTIONS[currentQ].options[index].score, weight: QUESTIONS[currentQ].weight });
+    currentQ++;
+    if (currentQ < QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      document.getElementById('progress-fill').style.width = '100%';
+      setTimeout(() => showScreen('screen-email'), 300);
+    }
+  }, 350);
+}
+
+function showResult() {
+  const weighted    = answers.reduce((acc, a) => acc + a.score * a.weight, 0);
+  const maxPossible = answers.reduce((acc, a) => acc + a.weight, 0);
+  const score = Math.round((weighted / maxPossible) * 100);
+  const tier  = SCORE_TIERS.find(t => score >= t.min);
+
+  showScreen('screen-result');
+
+  // anillo
+  const circumference = 459;
+  setTimeout(() => {
+    const ring = document.getElementById('ring-fill');
+    ring.style.stroke           = tier.color;
+    ring.style.strokeDashoffset = circumference - (score / 100) * circumference;
+  }, 120);
+
+  // número animado
+  let current = 0;
+  const el = document.getElementById('score-digit');
+  el.style.color = tier.color;
+  const interval = setInterval(() => {
+    current = Math.min(current + (score / 75), score);
+    el.textContent = Math.round(current);
+    if (current >= score) clearInterval(interval);
+  }, 16);
+
+  document.getElementById('score-label').textContent = tier.label;
+  document.getElementById('score-label').style.color = tier.color;
+  document.getElementById('score-desc').textContent  = tier.desc;
+  document.getElementById('reveal-text').innerHTML   = tier.reveal;
+
+  // insights por respuesta
+  const cards = document.getElementById('insight-cards');
+  cards.innerHTML = '';
+  const insights = generateInsights();
+  insights.forEach(ins => {
+    const card = document.createElement('div');
+    card.className = `insight-card ${ins.type}`;
+    card.innerHTML = `<span class="insight-icon">${ins.icon}</span><div class="insight-text"><strong>${ins.title}</strong>${ins.body}</div>`;
+    cards.appendChild(card);
+  });
+}
+
+function generateInsights() {
+  const insights = [];
+  const qty      = answers[0]?.score ?? 0;
+  const timing   = answers[1]?.score ?? 0;
+  const signals  = answers[2]?.score ?? 0;
+  const interf   = answers[3]?.score ?? 0;
+
+  if (qty >= 0.8) {
+    insights.push({ type:'good', icon:'💧', title:'Cantidad correcta', body:'Tomás el volumen de agua adecuado para sostener el rendimiento y la recuperación.' });
+  } else if (qty >= 0.4) {
+    insights.push({ type:'warn', icon:'💧', title:'Cantidad mejorable', body:'Estás cerca pero te falta volumen. Sumá un vaso de agua al despertar y uno antes de dormir.' });
+  } else {
+    insights.push({ type:'bad', icon:'💧', title:'Volumen insuficiente', body:'Tomás menos agua de la que tu cuerpo necesita para funcionar. Este es el cambio #1 a hacer.' });
+  }
+
+  if (signals >= 0.8) {
+    insights.push({ type:'good', icon:'🔍', title:'Monitoreás bien las señales', body:'Controlás indicadores objetivos de hidratación. La mayoría no llega a este nivel.' });
+  } else {
+    insights.push({ type:'warn', icon:'🔍', title:'Esperás la sed para tomar', body:'La sed aparece cuando ya perdiste entre 1% y 2% de tu peso en agua — demasiado tarde para el rendimiento.' });
+  }
+
+  if (interf <= 0.35) {
+    insights.push({ type:'bad', icon:'☕', title:'El mate/café te deshidrata', body:'Cada mate o café requiere compensar con agua extra. Con tu consumo actual, estás en deuda hídrica sin saberlo.' });
+  } else if (interf <= 0.7) {
+    insights.push({ type:'warn', icon:'☕', title:'Compensá el mate', body:'Tu consumo de mate/café es manejable, pero acordate de sumar agua extra para compensar el efecto diurético.' });
+  } else {
+    insights.push({ type:'good', icon:'☕', title:'Interferencias controladas', body:'Tu consumo de diuréticos es bajo. Eso facilita mantener un estado de hidratación estable.' });
+  }
+
+  return insights;
+}
+
+function shareScore() {
+  const score = document.getElementById('score-digit').textContent;
+  const tier  = document.getElementById('score-label').textContent;
+  const url   = window.location.origin + window.location.pathname;
+  const text  = `Mi WARLUS Hydration Score es ${score}/100 — ${tier}.\n¿Estás hidratado o solo creés que lo estás? 💧`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'WARLUS Hydration Score', text, url }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(`${text}\n${url}`).then(() => alert('¡Copiado! Pegalo en tu story.'));
+  } else {
+    alert(`${text}\n${url}`);
+  }
+}
+
+function restartQuiz() {
+  currentQ = 0; answers = [];
+  showScreen('screen-intro');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzYMV5QXDsz_7AyeGz0_vWPLYmIEWSRMqLzKA6uUp9YHKnuX_tQgMNW5au-qGcHHztW/exec';
+
+function submitAndShow() {
+  const nombre = document.getElementById('input-name').value.trim();
+  const email  = document.getElementById('input-email').value.trim();
+
+  if (!email) {
+    const inp = document.getElementById('input-email');
+    inp.style.borderColor = '#FF3B30';
+    inp.placeholder = 'Ingresá tu email para continuar';
+    return;
+  }
+
+  const weighted    = answers.reduce((acc, a) => acc + a.score * a.weight, 0);
+  const maxPossible = answers.reduce((acc, a) => acc + a.weight, 0);
+  const score = Math.round((weighted / maxPossible) * 100);
+  const tier  = SCORE_TIERS.find(t => score >= t.min);
+
+  fetch(SHEETS_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre, email, score, nivel: tier.label, test: 'hydration-score' })
+  }).catch(() => {});
+
+  showResult();
+}
+</script>
+</body>
+</html>
