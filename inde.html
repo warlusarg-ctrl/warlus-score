@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WARLUS — Descubrí tu Score</title>
+<meta name="description" content="Tres tests. Tres dimensiones. Descubrí cómo estás rindiendo y recuperando.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1B3C;
+    --navy-mid: #1A2B52;
+    --navy-light: #243466;
+    --blue: #2E5BFF;
+    --blue-light: #4A8CFF;
+    --white: #FFFFFF;
+    --gray: #8A94A6;
+    --cyan: #00D4FF;
+    --green: #34C759;
+    --orange: #FF9500;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--navy);
+    font-family: 'Barlow', sans-serif;
+    color: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 64px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* HEADER */
+  .logo-mark {
+    width: 36px;
+    height: 44px;
+    display: block;
+    margin: 0 auto 8px;
+  }
+  .logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 4px;
+    text-align: center;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .logo-tagline {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    color: var(--gray);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  /* HEADLINE */
+  .headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(30px, 8vw, 48px);
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.0;
+    margin-bottom: 12px;
+    max-width: 380px;
+  }
+  .headline em {
+    color: var(--blue-light);
+    font-style: normal;
+  }
+  .subhead {
+    font-size: 14px;
+    color: var(--gray);
+    text-align: center;
+    margin-bottom: 48px;
+    max-width: 300px;
+    line-height: 1.6;
+  }
+
+  /* CARDS */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 24px 20px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 12px 0 0 12px;
+    transition: opacity 0.2s;
+  }
+  .card:hover {
+    border-color: rgba(255,255,255,0.2);
+    background: #1E3060;
+    transform: translateY(-2px);
+  }
+  .card:active { transform: scale(0.99); }
+
+  .card.recovery::before { background: var(--blue); }
+  .card.athlete::before  { background: var(--green); }
+  .card.hydration::before { background: var(--cyan); }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 48px;
+    text-align: center;
+  }
+  .card-body { flex: 1; }
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .card.recovery .card-title { color: var(--blue-light); }
+  .card.athlete  .card-title { color: var(--green); }
+  .card.hydration .card-title { color: var(--cyan); }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .card-meta {
+    display: flex;
+    gap: 12px;
+  }
+  .meta-pill {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .meta-pill::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .card-arrow {
+    color: var(--gray);
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .card:hover .card-arrow {
+    color: var(--white);
+    transform: translateX(4px);
+  }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 56px;
+    text-align: center;
+  }
+  .footer-line {
+    width: 40px;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 auto 20px;
+  }
+  .footer-quote {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    line-height: 1.6;
+    max-width: 280px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <img class="logo-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAuoAAAQACAYAAAC3aHx4AAABWGlDQ1BJQ0MgUHJvZmlsZQAAeJx9kLFLw1AQxr9WpaB1EB0cHDKJQ5SSCro4tBVEcQhVweqUvqapkMZHkiIFN/+Bgv+BCs5uFoc6OjgIopPo5uSk4KLleS+JpCJ6j+N+fO+74zggOW5wbvcDqDu+W1zKK5ulLSX1jAS9IAzm8Zyur0r+rj/j/T703k7LWb///43Biukxqp+UGcZdH0ioxPqezyXvE4+5tBRxS7IV8onkcsjngWe9WCC+JlZYzagQvxCr5R7d6uG63WDRDnL7tOlsrMk5lBNYxA48cNgw0IQCHdk//LOBv4BdcjfhUp+FGnzqyZEiJ5jEy3DAMAOVWEOGUpN3ju53F91PjbWDJ2ChI4S4iLWVDnA2Rydrx9rUPDAyBFy1ueEagdRHmaxWgddTYLgEjN5Qz7ZXzWrh9uk8MPAoxNskkDoEui0hPo6E6B5T8wNw6XwBA6diE8HYWhMAABtfSURBVHic7d1blhPHFkVR+Q7632XfD7swUK9MKR8rIuZsQYHiY7HHUfHX33///QAAAFr+d/cPAAAAvCfUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS6gAAECTUAQAgSKgDAECQUAcAgCChDgAAQUIdAACChDoAAAQJdQAACBLqAAAQJNQBACBIqAMAQJBQBwCAIKEOAABBQh0AAIKEOgAABAl1AAAIEuoAABAk1AEAIEioAwBAkFAHAIAgoQ4AAEFCHQAAgoQ6AAAECXUAAAgS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" alt="WARLUS"/>
+  <div class="logo-text">WARLUS</div>
+  <div class="logo-tagline">Recuperación · Rendimiento</div>
+
+  <h1 class="headline">Descubrí<br>tu <em>score</em><br>hoy.</h1>
+  <p class="subhead">Tres tests. Tres dimensiones. Sabé exactamente dónde estás parado.</p>
+
+  <div class="cards">
+
+    <a class="card recovery" href="https://warlusarg-ctrl.github.io/warlus-score/">
+      <div class="card-icon">🔄</div>
+      <div class="card-body">
+        <div class="card-title">Recovery Score</div>
+        <div class="card-desc">Cómo está tu recuperación real. Sueño, carga y hábitos activos.</div>
+        <div class="card-meta">
+          <span class="meta-pill">5 preguntas</span>
+          <span class="meta-pill">45 segundos</span>
+        </div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a class="card athlete" href="https://warlusarg-ctrl.github.io/warlus-score/athlete-score">
+      <div class="card-icon">⚡</div>
+      <div class="card-body">
+        <div class="card-title">Athlete Score</div>
+        <div class="card-desc">Qué tan atleta sos realmente. Mentalidad, consistencia y rendimiento.</div>
+        <div class="card-meta">
+          <span class="meta-pill">7 preguntas</span>
+          <span class="meta-pill">60 segundos</span>
+        </div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a class="card hydration" href="https://warlusarg-ctrl.github.io/warlus-score/hydration-score">
+      <div class="card-icon">💧</div>
+      <div class="card-body">
+        <div class="card-title">Hydration Score</div>
+        <div class="card-desc">¿Realmente estás hidratado? El 2% de deshidratación baja tu rendimiento 20%.</div>
+        <div class="card-meta">
+          <span class="meta-pill">5 preguntas</span>
+          <span class="meta-pill">30 segundos</span>
+        </div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-line"></div>
+    <div class="footer-quote">No gana el que más entrena.<br>Gana el que mejor se recupera.</div>
+  </div>
+
+</div>
+</body>
+</html>
